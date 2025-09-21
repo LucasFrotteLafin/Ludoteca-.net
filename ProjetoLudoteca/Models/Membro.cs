@@ -1,21 +1,21 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 
-namespace Ludoteca.models;
+namespace Ludoteca.Models;
 
 public class Membro
 {
-    public int Senha { get; private set; }
+    public int CodigoMembro { get; private set; }
     public string Nome { get; private set; }
     public string Email { get; private set; }
     public string Telefone { get; private set; }
     public DateTime DataCadastro { get; private set; }
 
 
-    public Membro(int senha, string nome, string email, string telefone, DateTime dataCadastro)
+    public Membro(int codigoMembro, string nome, string email, string telefone, DateTime dataCadastro)
     {
-        if (senha <= 0 || senha > 999999)
-            throw new ArgumentException("A senha deve ser um número positivo e ter no máximo 6 dígitos", nameof(senha));
+        if (codigoMembro <= 0 || codigoMembro > 999999)
+            throw new ArgumentException("O código do membro deve ser um número positivo e ter no máximo 6 dígitos", nameof(codigoMembro));
 
         if (string.IsNullOrWhiteSpace(nome))
             throw new ArgumentException("O nome não pode ser vazio", nameof(nome));
@@ -31,15 +31,15 @@ public class Membro
         if (dataCadastro > DateTime.Now)
             throw new ArgumentException("Data de cadastro não pode ser futura.", nameof(dataCadastro));
 
-        Senha = senha;
+        CodigoMembro = codigoMembro;
         Nome = nome;
         Email = email;
         Telefone = telefone;
         DataCadastro = dataCadastro;
     }
 
-    public Membro(int senha, string nome, string email, string telefone)
-        : this(senha, nome, email, telefone, DateTime.Now)
+    public Membro(int codigoMembro, string nome, string email, string telefone)
+        : this(codigoMembro, nome, email, telefone, DateTime.Now)
     {
     }
 
