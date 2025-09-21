@@ -28,6 +28,10 @@ public class Jogo
         this.situacao = situacao;
     }
 
+    public override string ToString()
+    {
+        return $"{Id} | {Nome} | {Categoria} | {IdadeMinima} | {Situacao}"
+    }
 
 }
 

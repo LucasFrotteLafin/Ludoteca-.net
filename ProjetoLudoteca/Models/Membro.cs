@@ -48,3 +48,4 @@ public class Membro
         return $"{Nome} | {Email} | {Telefone} | Cadastro : {DataCadastro:dd/MM/yyyy}";
     }
 }
+

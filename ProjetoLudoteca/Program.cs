@@ -1,17 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.IO;
+using System.Collections;
 using System.Linq.Expressions;
-using LudotecaServise.Service;
+using Ludoteca.Service; 
 
 class Program
 {
     static void Main(string[] args)
     {
-        //Cria uma instancia do servise LudotecaService, que contém os métodos que realizam as operações do sistema
-        var ludoteca = new LudotecaService();
+        BibliotecaJogos ludoteca = new BibliotecaJogos()
 
         while (true)
         {
-            //Interface menu principal
             Console.Clear();
             Console.WriteLine("=== LUDOTECA .NET ===");
             Console.WriteLine("1 - Cadastrar jogo");
@@ -23,9 +23,8 @@ class Program
             Console.WriteLine("0 - Sair");
             Console.WriteLine("Opção: ");
 
-            int opcao = Console.ReadLine();
+            string opcao = Console.ReadLine(); 
 
-            //switch case das opções
             try
             {
                 switch (opcao)
@@ -53,11 +52,8 @@ class Program
                     default:
                         Console.WriteLine("Opção inválida!");
                         break;
-
-
                 }
             }
-            //tratamento de erro
             catch (Exception ex)
             {
                 File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro: {ex.Message}\n");
@@ -66,9 +62,7 @@ class Program
 
             Console.WriteLine("\nPressione Enter para continuar.");
             Console.ReadLine();
-
         }
-        
     }
 }
 
