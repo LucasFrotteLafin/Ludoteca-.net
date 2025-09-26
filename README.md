@@ -65,6 +65,9 @@ ProjetoLudoteca/
 - **Serialização**: JSON com System.Text.Json
 - **Separação de Responsabilidades**: Models, Services, Program
 
+## UML
+https://drive.google.com/file/d/12O7z3cC2zo8BqCUs5LKNd9w1FNXRLkOX/view?usp=sharing
+
 ## Tecnologias
 - C# .NET 9.0
 - System.Text.Json
