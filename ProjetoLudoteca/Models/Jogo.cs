@@ -5,7 +5,7 @@ namespace Ludoteca.Models;
 
 public class Jogo
 {
-    private const int IDADE_MAXIMA_PERMITIDA = 18;
+    private const int RESTRICAO_DE_IDADE = 18;
     
     public int Id { get; private set; }  // [AV1-2]
     public string Nome { get; private set; }  // [AV1-2]
@@ -53,8 +53,8 @@ public class Jogo
 
     private static void ValidarIdadeMinima(int idade)
     {
-        if (idade < 0 || idade > IDADE_MAXIMA_PERMITIDA)
-            throw new ArgumentException($"Idade deve estar entre 0 e {IDADE_MAXIMA_PERMITIDA} anos", nameof(idade));
+        if (idade < 0 || idade > RESTRICAO_DE_IDADE)
+            throw new ArgumentException($"Idade deve estar entre 0 e {RESTRICAO_DE_IDADE} anos", nameof(idade));
     }
 
     public void MarcarComoEmprestado()
@@ -66,8 +66,6 @@ public class Jogo
 
     public void MarcarComoDevolvido()
     {
-        if (!EstaEmprestado)
-            throw new InvalidOperationException($"Jogo '{Nome}' não está emprestado");
         EstaEmprestado = false;
     }
 
