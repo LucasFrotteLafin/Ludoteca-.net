@@ -6,10 +6,13 @@ namespace Ludoteca.Models;
 
 public class Membro
 {
+    // Constantes para validação
     private const int CODIGO_MAXIMO = 999999;
     private const string PADRAO_EMAIL = @"^[a-zA-Z0-9._]+@[a-zA-Z0-9._]+\.[a-zA-Z]{2,}$";
     private const string PADRAO_TELEFONE = @"^[1-9]{2}[9]?[0-9]{8}$";
+    private const int IDADE_MAXIMA = 120;
 
+    // Propriedades públicas
     public int CodigoMembro { get; private set; }
     public string Nome { get; private set; }
     public string Email { get; private set; }
@@ -18,31 +21,33 @@ public class Membro
     public DateTime DataCadastro { get; private set; }
     public int Idade => CalcularIdade();
 
-    public Membro() 
+    [JsonConstructor]
+    public Membro(int codigoMembro, string nome, string email, string telefone, DateTime dataNascimento, DateTime dataCadastro = default)
     {
-        Nome = Email = Telefone = string.Empty;
+        // Se dataCadastro não foi informada, usa data atual
+        if (dataCadastro == default)
+            dataCadastro = DateTime.Now;
+            
+        ValidarDados(codigoMembro, nome, email, telefone, dataNascimento, dataCadastro);
+        
+        CodigoMembro = codigoMembro;
+        Nome = nome ?? string.Empty;
+        Email = email ?? string.Empty;
+        Telefone = telefone ?? string.Empty;
+        DataNascimento = dataNascimento;
+        DataCadastro = dataCadastro;
     }
 
-    [JsonConstructor]
-    public Membro(int codigoMembro, string nome, string email, string telefone, DateTime dataNascimento, DateTime dataCadastro)
+    // Método centralizado de validação
+    private static void ValidarDados(int codigo, string nome, string email, string telefone, DateTime dataNascimento, DateTime dataCadastro)
     {
-        ValidarCodigo(codigoMembro);
+        ValidarCodigo(codigo);
         ValidarNome(nome);
         ValidarEmail(email);
         ValidarTelefone(telefone);
         ValidarDataNascimento(dataNascimento);
         ValidarDataCadastro(dataCadastro);
-
-        CodigoMembro = codigoMembro;
-        Nome = nome;
-        Email = email;
-        Telefone = telefone;
-        DataNascimento = dataNascimento;
-        DataCadastro = dataCadastro;
     }
-
-    public Membro(int codigoMembro, string nome, string email, string telefone, DateTime dataNascimento)
-        : this(codigoMembro, nome, email, telefone, dataNascimento, DateTime.Now) { }
 
     private static void ValidarCodigo(int codigo)
     {
@@ -53,41 +58,45 @@ public class Membro
     private static void ValidarNome(string nome)
     {
         if (string.IsNullOrWhiteSpace(nome))
-            throw new ArgumentException("Nome não pode ser vazio", nameof(nome));
+            throw new ArgumentException("Nome é obrigatório", nameof(nome));
     }
 
     private static void ValidarEmail(string email)
     {
-        if (!Regex.IsMatch(email, PADRAO_EMAIL))
+        if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, PADRAO_EMAIL))
             throw new ArgumentException("Email inválido", nameof(email));
     }
 
     private static void ValidarTelefone(string telefone)
     {
         if (string.IsNullOrWhiteSpace(telefone) || !Regex.IsMatch(telefone, PADRAO_TELEFONE))
-            throw new ArgumentException("Telefone inválido", nameof(telefone));
+            throw new ArgumentException("Telefone deve ter formato: DDNNNNNNNNN (ex: 11987654321)", nameof(telefone));
     }
 
     private static void ValidarDataNascimento(DateTime data)
     {
         if (data > DateTime.Now)
             throw new ArgumentException("Data de nascimento não pode ser futura", nameof(data));
-        if (data < DateTime.Now.AddYears(-120))
-            throw new ArgumentException("Data de nascimento inválida", nameof(data));
+        if (data < DateTime.Now.AddYears(-IDADE_MAXIMA))
+            throw new ArgumentException($"Idade não pode ser superior a {IDADE_MAXIMA} anos", nameof(data));
     }
 
     private static void ValidarDataCadastro(DateTime data)
     {
         if (data > DateTime.Now)
-            throw new ArgumentException("Data não pode ser futura", nameof(data));
+            throw new ArgumentException("Data de cadastro não pode ser futura", nameof(data));
     }
 
     private int CalcularIdade()
     {
         var hoje = DateTime.Now;
         var idade = hoje.Year - DataNascimento.Year;
-        if (hoje < DataNascimento.AddYears(idade))
+        
+        // Ajusta se ainda não fez aniversário este ano
+        if (hoje.Month < DataNascimento.Month || 
+            (hoje.Month == DataNascimento.Month && hoje.Day < DataNascimento.Day))
             idade--;
+            
         return idade;
     }
 

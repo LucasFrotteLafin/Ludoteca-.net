@@ -10,8 +10,7 @@ class Program
 
         while (true)
         {
-            Console.Clear();
-            Console.WriteLine("=== LUDOTECA .NET ===");
+            Console.WriteLine("\n=== LUDOTECA .NET ===");
             Console.WriteLine("1 - Cadastrar jogo");
             Console.WriteLine("2 - Cadastrar membro");
             Console.WriteLine("3 - Listar jogos");
@@ -80,6 +79,3 @@ class Program
         }
     }
 }
-
-//"2025-09-21T10:00:00"
-//"2024-09-22T10:00:00"

@@ -9,13 +9,11 @@ namespace Ludoteca.Services;
 
 public class BibliotecaJogos
 {
-    private List<Jogo> jogos; // [AV1-2]
-    private List<Membro> membros; // [AV1-2]
-    private List<Emprestimo> emprestimos; // [AV1-2]
-    private int proximoIdJogo; // [AV1-2]
-    private int proximoIdEmprestimo; // [AV1-2]
-
-    private readonly string caminhoArquivo; // [AV1-2]
+    private List<Jogo> jogos;
+    private List<Membro> membros;
+    private List<Emprestimo> emprestimos;
+    private int proximoIdJogo;
+    private readonly string caminhoArquivo;
 
     public BibliotecaJogos(string? caminhoPersonalizado = null)
     {
@@ -23,8 +21,7 @@ public class BibliotecaJogos
         membros = new List<Membro>();
         emprestimos = new List<Emprestimo>();
         proximoIdJogo = 1;
-        proximoIdEmprestimo = 1;
-        caminhoArquivo = caminhoPersonalizado ?? "data/biblioteca.json";
+        caminhoArquivo = caminhoPersonalizado ?? "Data/biblioteca.json";
 
         try
         {
@@ -33,7 +30,7 @@ public class BibliotecaJogos
         }
         catch (Exception ex)
         {
-            File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro na inicialização: {ex.Message}\n");
+            File.AppendAllText("Data/debug.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR - Inicialização: {ex.Message} | StackTrace: {ex.StackTrace}\n");
         }
     }
 
@@ -48,11 +45,9 @@ public class BibliotecaJogos
 
     public void AdicionarJogo(string nome, string categoria, int idadeMinima)
     {
-        // Assertiva de consistência
         if (jogos == null)
             throw new InvalidOperationException("Lista de jogos não inicializada");
 
-        // Verificar se jogo já existe
         bool jogoExiste = false;
         for (int i = 0; i < jogos.Count; i++)
         {
@@ -70,17 +65,17 @@ public class BibliotecaJogos
 
         Jogo novoJogo = new Jogo(proximoIdJogo, nome, categoria, idadeMinima);
         jogos.Add(novoJogo);
+        if (proximoIdJogo >= int.MaxValue)
+            throw new InvalidOperationException("Limite máximo de jogos atingido");
         proximoIdJogo++;
         SalvarDados();
     }
 
     public void AdicionarMembro(string nome, string email, string telefone, int codigoMembro, DateTime dataNascimento)
     {
-        // Assertiva de consistência
         if (membros == null)
             throw new InvalidOperationException("Lista de membros não inicializada");
 
-        // Verificar se email já existe
         bool emailExiste = false;
         for (int i = 0; i < membros.Count; i++)
         {
@@ -96,7 +91,6 @@ public class BibliotecaJogos
             throw new ArgumentException("Email já existe!");
         }
 
-        // Verificar se código já existe
         bool codigoExiste = false;
         for (int i = 0; i < membros.Count; i++)
         {
@@ -117,17 +111,12 @@ public class BibliotecaJogos
         SalvarDados();
     }
 
-
-
     public void RealizarEmprestimo(int idJogo, int codigoMembro)
     {
-        // Assertivas de consistência
         if (jogos == null || membros == null || emprestimos == null)
             throw new InvalidOperationException("Listas não inicializadas");
 
-        // Buscar jogo
         Jogo? jogo = null;
-       
         for (int i = 0; i < jogos.Count; i++)
         {
             if (jogos[i].Id == idJogo)
@@ -142,7 +131,6 @@ public class BibliotecaJogos
             throw new ArgumentException("Jogo não encontrado!");
         }
 
-        // Buscar membro
         Membro? membro = null;
         for (int i = 0; i < membros.Count; i++)
         {
@@ -155,11 +143,9 @@ public class BibliotecaJogos
 
         if (membro == null)
         {
-            Console.WriteLine($"Membros cadastrados: {string.Join(", ", membros.Select(m => m.CodigoMembro))}");
             throw new ArgumentException($"Código do membro {codigoMembro} não encontrado!");
         }
 
-        // Verificar idade para o jogo
         if (!membro.PodeAlugarJogo(jogo.IdadeMinima))
         {
             throw new InvalidOperationException($"Membro tem {membro.Idade} anos. Idade mínima para este jogo: {jogo.IdadeMinima} anos");
@@ -171,19 +157,16 @@ public class BibliotecaJogos
         }
 
         jogo.MarcarComoEmprestado();
-        Emprestimo novoEmprestimo = new Emprestimo(proximoIdEmprestimo, idJogo, codigoMembro, 7);
+        Emprestimo novoEmprestimo = new Emprestimo(idJogo, codigoMembro, 7);
         emprestimos.Add(novoEmprestimo);
-        proximoIdEmprestimo++;
         SalvarDados();
     }
 
     public void RealizarDevolucao(int idJogo)
     {
-        // Assertivas de consistência
         if (jogos == null || emprestimos == null)
             throw new InvalidOperationException("Listas não inicializadas");
 
-        // Buscar jogo
         Jogo? jogo = null;
         for (int i = 0; i < jogos.Count; i++)
         {
@@ -199,11 +182,16 @@ public class BibliotecaJogos
             throw new ArgumentException("Jogo não encontrado!", nameof(idJogo));
         }
 
-        // Buscar empréstimo ativo
-        Emprestimo? emprestimo = null;
-        for (int i = 0; i < emprestimos.Count; i++)
+        if (!jogo.EstaEmprestado)
         {
-            if (emprestimos[i].IdJogo == idJogo && emprestimos[i].Ativo)
+            throw new InvalidOperationException("Jogo não está emprestado!");
+        }
+        
+        // Buscar o empréstimo mais recente para este jogo
+        Emprestimo? emprestimo = null;
+        for (int i = emprestimos.Count - 1; i >= 0; i--)
+        {
+            if (emprestimos[i].IdJogo == idJogo)
             {
                 emprestimo = emprestimos[i];
                 break;
@@ -212,49 +200,47 @@ public class BibliotecaJogos
 
         if (emprestimo == null)
         {
-            throw new InvalidOperationException("Jogo não está emprestado!");
+            throw new InvalidOperationException("Empréstimo não encontrado para este jogo!");
         }
 
         if (emprestimo.EstaAtrasado())
         {
-            decimal multa = CalcularMulta(idJogo);
-            Console.WriteLine($"Jogo está atrasado! Multa: R$ {multa:F2}");
+            Console.WriteLine($"Jogo está atrasado! Multa: R$ {emprestimo.ValorMulta:F2}");
             Console.Write("Deseja pagar a multa agora? (s/n): ");
             string resposta = Console.ReadLine()?.ToLower() ?? "";
-            
+
             if (resposta == "s" || resposta == "sim")
             {
                 Console.Write("Forma de pagamento (pix/dinheiro): ");
                 string formaPagamento = Console.ReadLine() ?? "";
-                
+
                 if (formaPagamento.ToLower() == "pix" || formaPagamento.ToLower() == "dinheiro")
                 {
-                    // Calcular dias de atraso
-            int diasAtr-aso = 0;
-            for (int i = 0; i < emprestimos.Count; i++)
-            {
-                if (emprestimos[i].IdJogo == idJogo && emprestimos[i].Ativo)
-                {
-                    diasAtraso = (DateTime.Now - emprestimos[i].DataDevolucao).Days;
-                    break;
-                }
-            }
-            Console.WriteLine($"Multa de R$ {multa:F2} ({diasAtraso} dias excedidos) paga via {formaPagamento}.");
+                    emprestimo.RegistrarPagamentoMulta(formaPagamento.ToLower());
+                    Console.WriteLine($"Multa de R$ {emprestimo.ValorMulta:F2} ({emprestimo.DiasAtraso} dias excedidos) paga via {formaPagamento}.");
+                    
+                    jogo.MarcarComoDevolvido();
+                    SalvarDados();
+                    Console.WriteLine("Jogo devolvido com sucesso!");
                 }
                 else
                 {
-                    Console.WriteLine("Forma de pagamento inválida. Multa não paga.");
+                    Console.WriteLine("Forma de pagamento inválida. Multa não paga. Jogo não foi devolvido.");
+                    return;
                 }
             }
             else
             {
-                Console.WriteLine("Multa não paga. Você pode pagar depois pelo menu principal.");
+                Console.WriteLine("Multa não paga. Jogo não foi devolvido. Você deve pagar a multa antes de devolver.");
+                return;
             }
         }
-
-        emprestimo.Devolver();
-        jogo.MarcarComoDevolvido();
-        SalvarDados();
+        else
+        {
+            jogo.MarcarComoDevolvido();
+            SalvarDados();
+            Console.WriteLine("Jogo devolvido com sucesso!");
+        }
     }
 
     public void SalvarDados()
@@ -268,18 +254,17 @@ public class BibliotecaJogos
             dados.Membros = membros;
             dados.Emprestimos = emprestimos;
             dados.ProximoIdJogo = proximoIdJogo;
-            dados.ProximoIdEmprestimo = proximoIdEmprestimo;
 
             JsonSerializerOptions opcoes = new JsonSerializerOptions();
             opcoes.WriteIndented = true;
             opcoes.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
-            string json = JsonSerializer.Serialize(dados, opcoes); // [AV1-3]
+            string json = JsonSerializer.Serialize(dados, opcoes);
             File.WriteAllText(caminhoArquivo, json);
         }
         catch (Exception ex)
         {
-            File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro ao salvar dados: {ex.Message}\n");
+            File.AppendAllText("Data/debug.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR - SalvarDados: {ex.Message} | StackTrace: {ex.StackTrace}\n");
             Console.WriteLine($"Erro ao salvar dados: {ex.Message}");
         }
     }
@@ -288,6 +273,11 @@ public class BibliotecaJogos
     {
         try
         {
+            // Limpar listas antes de carregar novos dados
+            jogos.Clear();
+            membros.Clear();
+            emprestimos.Clear();
+            
             if (!File.Exists(caminhoArquivo))
             {
                 return;
@@ -303,70 +293,151 @@ public class BibliotecaJogos
             JsonSerializerOptions opcoes = new JsonSerializerOptions();
             opcoes.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
-            DadosBiblioteca? dados = JsonSerializer.Deserialize<DadosBiblioteca>(json, opcoes); // [AV1-3]
+            DadosBiblioteca? dados = JsonSerializer.Deserialize<DadosBiblioteca>(json, opcoes);
 
             if (dados != null)
             {
-                if (dados.Jogos != null)
-                    jogos = dados.Jogos;
-
-                if (dados.Membros != null)
-                    membros = dados.Membros;
-
-                if (dados.Emprestimos != null)
-                    emprestimos = dados.Emprestimos;
-
+                jogos.AddRange(dados.Jogos ?? new List<Jogo>());
+                membros.AddRange(dados.Membros ?? new List<Membro>());
+                emprestimos.AddRange(dados.Emprestimos ?? new List<Emprestimo>());
                 proximoIdJogo = dados.ProximoIdJogo;
-                proximoIdEmprestimo = dados.ProximoIdEmprestimo;
             }
         }
         catch (Exception ex)
         {
-            File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro ao carregar dados: {ex.Message}\n");
+            File.AppendAllText("Data/debug.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR - CarregarDados: {ex.Message} | StackTrace: {ex.StackTrace}\n");
             Console.WriteLine($"Erro ao carregar dados: {ex.Message}");
         }
     }
 
-    public void CadastrarJogo()
+    public decimal CalcularMulta(int idJogo)
     {
-        Console.Write("Nome do jogo: ");
-        string nome = Console.ReadLine() ?? "";
-        Console.Write("Categoria: ");
-        string categoria = Console.ReadLine() ?? "";
-        Console.Write("Idade mínima: ");
+        CarregarDados();
         
-        if (!int.TryParse(Console.ReadLine(), out int idade))
+        // Verificar se o jogo existe e está emprestado
+        Jogo? jogo = null;
+        for (int i = 0; i < jogos.Count; i++)
         {
-            throw new ArgumentException("Idade deve ser um número válido");
+            if (jogos[i].Id == idJogo)
+            {
+                jogo = jogos[i];
+                break;
+            }
         }
         
-        AdicionarJogo(nome, categoria, idade);
-        Console.WriteLine("Jogo cadastrado com sucesso!");
+        if (jogo == null)
+        {
+            Console.WriteLine($"Jogo ID {idJogo} não encontrado");
+            return 0;
+        }
+        
+        if (!jogo.EstaEmprestado)
+        {
+            Console.WriteLine($"Jogo '{jogo.Nome}' não está emprestado");
+            return 0;
+        }
+        
+        // Buscar o empréstimo mais recente para este jogo
+        Emprestimo? emprestimoAtual = null;
+        for (int i = emprestimos.Count - 1; i >= 0; i--)
+        {
+            if (emprestimos[i].IdJogo == idJogo)
+            {
+                emprestimoAtual = emprestimos[i];
+                break;
+            }
+        }
+        
+        if (emprestimoAtual == null)
+        {
+            Console.WriteLine($"Jogo '{jogo.Nome}' marcado como emprestado mas sem empréstimo registrado");
+            return 0;
+        }
+        
+        if (emprestimoAtual.EstaAtrasado())
+        {
+            Console.WriteLine($"Jogo '{jogo.Nome}' emprestado em {emprestimoAtual.DataEmprestimo:dd/MM/yyyy}, deveria ter sido devolvido em {emprestimoAtual.DataDevolucao:dd/MM/yyyy}. Atraso: {emprestimoAtual.DiasAtraso} dias. Multa: R$ {emprestimoAtual.ValorMulta:F2}");
+            return emprestimoAtual.ValorMulta;
+        }
+        
+        Console.WriteLine($"{jogo.Nome} está dentro do prazo registrado");
+        return 0;
+    }
+
+    public void VerificarMulta()
+    {
+        CarregarDados();
+        
+        int idJogo;
+        while (true)
+        {
+            Console.Write("ID do jogo para verificar multa: ");
+            if (int.TryParse(Console.ReadLine(), out idJogo))
+                break;
+            Console.WriteLine("Por favor, digite um número válido.");
+        }
+
+        decimal multa = CalcularMulta(idJogo);
+        Console.WriteLine($"\nResultado: R$ {multa:F2}");
+    }
+
+    public void CadastrarJogo()
+    {
+        try
+        {
+            Console.Write("Nome do jogo: ");
+            string nome = Console.ReadLine() ?? "";
+            Console.Write("Categoria: ");
+            string categoria = Console.ReadLine() ?? "";
+            Console.Write("Idade mínima: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int idade))
+            {
+                Console.WriteLine("Erro: Idade deve ser um número válido");
+                return;
+            }
+
+            AdicionarJogo(nome, categoria, idade);
+            Console.WriteLine("Jogo cadastrado com sucesso!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro: {ex.Message}");
+        }
     }
 
     public void CadastrarMembro()
     {
-        Console.Write("Nome: ");
-        string nome = Console.ReadLine() ?? "";
-        Console.Write("Email: ");
-        string email = Console.ReadLine() ?? "";
-        Console.Write("Telefone: ");
-        string telefone = Console.ReadLine() ?? "";
-        Console.Write("Código do membro (número): ");
-        
-        if (!int.TryParse(Console.ReadLine(), out int codigoMembro))
+        try
         {
-            throw new ArgumentException("Código deve ser um número válido");
+            Console.Write("Nome: ");
+            string nome = Console.ReadLine() ?? "";
+            Console.Write("Email: ");
+            string email = Console.ReadLine() ?? "";
+            Console.Write("Telefone: ");
+            string telefone = Console.ReadLine() ?? "";
+            Console.Write("Código do membro (número): ");
+
+            if (!int.TryParse(Console.ReadLine(), out int codigoMembro))
+            {
+                Console.WriteLine("Erro: Código deve ser um número válido");
+                return;
+            }
+
+            Console.Write("Data de nascimento (dd/MM/yyyy): ");
+            if (!DateTime.TryParseExact(Console.ReadLine(), "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime dataNascimento))
+            {
+                Console.WriteLine("Erro: Data deve estar no formato dd/MM/yyyy");
+                return;
+            }
+
+            AdicionarMembro(nome, email, telefone, codigoMembro, dataNascimento);
+            Console.WriteLine("Membro cadastrado com sucesso!");
         }
-        
-        Console.Write("Data de nascimento (dd/MM/yyyy): ");
-        if (!DateTime.TryParseExact(Console.ReadLine(), "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime dataNascimento))
+        catch (Exception ex)
         {
-            throw new ArgumentException("Data deve estar no formato dd/MM/yyyy");
+            Console.WriteLine($"Erro: {ex.Message}");
         }
-        
-        AdicionarMembro(nome, email, telefone, codigoMembro, dataNascimento);
-        Console.WriteLine("Membro cadastrado com sucesso!");
     }
 
     public void ListarJogos()
@@ -376,7 +447,7 @@ public class BibliotecaJogos
             Console.WriteLine("Nenhum jogo cadastrado.");
             return;
         }
-        
+
         Console.WriteLine("\n=== JOGOS CADASTRADOS ===");
         foreach (Jogo jogo in jogos)
         {
@@ -391,13 +462,13 @@ public class BibliotecaJogos
         {
             throw new ArgumentException("ID do jogo deve ser um número válido");
         }
-        
+
         Console.Write("Código do membro: ");
         if (!int.TryParse(Console.ReadLine(), out int codigoMembro))
         {
             throw new ArgumentException("Código do membro deve ser um número válido");
         }
-        
+
         RealizarEmprestimo(idJogo, codigoMembro);
         Console.WriteLine("Jogo emprestado com sucesso!");
     }
@@ -409,9 +480,8 @@ public class BibliotecaJogos
         {
             throw new ArgumentException("ID do jogo deve ser um número válido");
         }
-        
+
         RealizarDevolucao(idJogo);
-        Console.WriteLine("Jogo devolvido com sucesso!");
     }
 
     public void GerarRelatorio()
@@ -420,8 +490,7 @@ public class BibliotecaJogos
         {
             VerificarPasta();
 
-
-        string caminhoRelatorio = Path.Combine("Data", "relatorio.txt");
+            string caminhoRelatorio = Path.Combine("Data", "relatorio.txt");
 
             string relatorio = "\n=== RELATÓRIO DA LUDOTECA ===\n";
             relatorio += $"Data: {DateTime.Now:dd/MM/yyyy HH:mm}\n\n";
@@ -438,42 +507,55 @@ public class BibliotecaJogos
                 relatorio += membros[i].ToString() + "\n";
             }
 
-            relatorio += "\nEMPRÉSTIMOS ATIVOS:\n";
-            for (int i = 0; i < emprestimos.Count; i++)
+            relatorio += "\nJOGOS EMPRESTADOS:\n";
+            for (int i = 0; i < jogos.Count; i++)
             {
-                if (emprestimos[i].Ativo)
+                if (jogos[i].EstaEmprestado)
                 {
-                    string nomeJogo = "Jogo não encontrado";
-                    for (int j = 0; j < jogos.Count; j++)
+                    // Buscar empréstimo mais recente
+                    Emprestimo? emprestimo = null;
+                    for (int j = emprestimos.Count - 1; j >= 0; j--)
                     {
-                        if (jogos[j].Id == emprestimos[i].IdJogo)
+                        if (emprestimos[j].IdJogo == jogos[i].Id)
                         {
-                            nomeJogo = jogos[j].Nome;
+                            emprestimo = emprestimos[j];
                             break;
                         }
                     }
+                    
+                    if (emprestimo != null)
+                    {
+                        string statusMulta = "";
+                        if (emprestimo.EstaAtrasado())
+                        {
+                            statusMulta = $" | ATRASADO: {emprestimo.DiasAtraso} dias - Multa: R$ {emprestimo.ValorMulta:F2}";
+                        }
 
-                    relatorio += $"ID: {emprestimos[i].Id} | Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Empréstimo: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolução: {emprestimos[i].DataDevolucao:dd/MM/yyyy} | Status: Ativo\n";
+                        relatorio += $"Jogo: {jogos[i].Nome} | Membro: {emprestimo.CodigoMembro} | Empréstimo: {emprestimo.DataEmprestimo:dd/MM/yyyy} | Devolução: {emprestimo.DataDevolucao:dd/MM/yyyy}{statusMulta}\n";
+                    }
                 }
             }
 
-            relatorio += "\nHISTÓRICO DE EMPRÉSTIMOS DEVOLVIDOS:\n";
+            relatorio += "\nHISTÓRICO DE EMPRÉSTIMOS:\n";
             for (int i = 0; i < emprestimos.Count; i++)
             {
-                if (!emprestimos[i].Ativo)
+                string nomeJogo = "Jogo não encontrado";
+                for (int j = 0; j < jogos.Count; j++)
                 {
-                    string nomeJogo = "Jogo não encontrado";
-                    for (int j = 0; j < jogos.Count; j++)
+                    if (jogos[j].Id == emprestimos[i].IdJogo)
                     {
-                        if (jogos[j].Id == emprestimos[i].IdJogo)
-                        {
-                            nomeJogo = jogos[j].Nome;
-                            break;
-                        }
+                        nomeJogo = jogos[j].Nome;
+                        break;
                     }
-
-                    relatorio += $"ID: {emprestimos[i].Id} | Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Alugado: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolvido: {DateTime.Now:dd/MM/yyyy}\n";
                 }
+
+                string infoMulta = "";
+                if (emprestimos[i].MultaPaga)
+                {
+                    infoMulta = $" | MULTA PAGA: R$ {emprestimos[i].ValorMulta:F2} ({emprestimos[i].DiasAtraso} dias) - {emprestimos[i].MetodoPagamento}";
+                }
+
+                relatorio += $"Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Empréstimo: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolução: {emprestimos[i].DataDevolucao:dd/MM/yyyy}{infoMulta}\n";
             }
 
             relatorio += "\n" + new string('-', 50) + "\n";
@@ -483,25 +565,12 @@ public class BibliotecaJogos
         }
         catch (Exception ex)
         {
-            File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro ao gerar relatório: {ex.Message}\n");
+            File.AppendAllText("Data/debug.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR - GerarRelatorio: {ex.Message} | StackTrace: {ex.StackTrace}\n");
             Console.WriteLine($"Erro ao gerar relatório: {ex.Message}");
         }
     }
 
-    public decimal CalcularMulta(int idJogo)
-    {
-        for (int i = 0; i < emprestimos.Count; i++)
-        {
-            if (emprestimos[i].IdJogo == idJogo && emprestimos[i].Ativo)
-            {
-                DateTime hoje = DateTime.Now;
-                int diasAtraso = (hoje.Date - emprestimos[i].DataDevolucao.Date).Days;
-                if (diasAtraso > 0)
-                    return diasAtraso * 2.50m;
-            }
-        }
-        return 0;
-    }
+
 
     public void PagarMulta(int idJogo, string formaPagamento)
     {
@@ -517,7 +586,7 @@ public class BibliotecaJogos
         if (string.Equals(pagamento, "pix", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(pagamento, "dinheiro", StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"Multa de R$ {multa:F2}  paga via {formaPagamento}.");
+            Console.WriteLine($"Multa de R$ {multa:F2} paga via {formaPagamento}.");
         }
         else
         {
@@ -558,25 +627,34 @@ public class BibliotecaJogos
         PagarMulta(idJogo, formaPagamento);
     }
 
-    public void VerificarMulta()
-    {
-        int idJogo;
-        while (true)
-        {
-            Console.Write("ID do jogo para verificar multa: ");
-            if (int.TryParse(Console.ReadLine(), out idJogo))
-                break;
-            Console.WriteLine("Por favor, digite um número válido.");
-        }
-
-        decimal multa = CalcularMulta(idJogo);
-        Console.WriteLine($"Multa calculada: R$ {multa:F2}");
-    }
-
     public void RecarregarDados()
     {
+        Console.WriteLine("\nAntes do recarregamento:");
+        Console.WriteLine($"Jogos: {jogos.Count}, Membros: {membros.Count}, Empréstimos: {emprestimos.Count}");
+        
         CarregarDados();
-        Console.WriteLine("Dados recarregados do arquivo JSON!");
+        
+        Console.WriteLine("\nApós o recarregamento:");
+        Console.WriteLine($"Jogos: {jogos.Count}, Membros: {membros.Count}, Empréstimos: {emprestimos.Count}");
+        
+        // Recalcular próximos IDs baseado nos dados carregados
+        if (jogos.Count > 0)
+        {
+            int maiorIdJogo = 0;
+            for (int i = 0; i < jogos.Count; i++)
+            {
+                if (jogos[i].Id > maiorIdJogo)
+                    maiorIdJogo = jogos[i].Id;
+            }
+            proximoIdJogo = maiorIdJogo + 1;
+        }
+        else
+        {
+            proximoIdJogo = 1;
+        }
+        
+        Console.WriteLine("\nDados recarregados do arquivo JSON!");
+        Console.WriteLine($"Próximo ID de jogo: {proximoIdJogo}");
     }
 
 }
@@ -587,5 +665,4 @@ public class DadosBiblioteca
     public List<Membro> Membros { get; set; } = new List<Membro>();
     public List<Emprestimo> Emprestimos { get; set; } = new List<Emprestimo>();
     public int ProximoIdJogo { get; set; }
-    public int ProximoIdEmprestimo { get; set; }
 }
