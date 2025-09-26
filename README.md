@@ -72,8 +72,8 @@ ProjetoLudoteca/
 - Console Application
 
 ## Autores
-06009322 - Ana Luiza Maciel Mattos
-06010493 - Lucas Frotté Lafin
-06010196 - Pedro Nogueira Teodosio 
-06010479 - Alexandre dos Santos Firmino
-06010096 - Ana Carolina da Costa Tomás da Rocha 
+- 06009322 - Ana Luiza Maciel Mattos
+- 06010493 - Lucas Frotté Lafin
+- 06010196 - Pedro Nogueira Teodosio 
+- 06010479 - Alexandre dos Santos Firmino
+- 06010096 - Ana Carolina da Costa Tomás da Rocha 
