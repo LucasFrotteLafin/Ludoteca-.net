@@ -7,12 +7,12 @@ public class Emprestimo
 {
     private const int DIAS_MAXIMO_EMPRESTIMO = 7;
 
-    public int Id { get; set; }  // [AV1-2]
-    public int IdJogo { get; set; }  // [AV1-2]
-    public int CodigoMembro { get; set; }  // [AV1-2]
-    public DateTime DataEmprestimo { get; set; }  // [AV1-2]
-    public DateTime DataDevolucao { get; set; }  // [AV1-2]
-    public bool Ativo { get; set; }  // [AV1-2]
+    public int Id { get; private set; }  // [AV1-2]
+    public int IdJogo { get; private set; }  // [AV1-2]
+    public int CodigoMembro { get; private set; }  // [AV1-2]
+    public DateTime DataEmprestimo { get; private set; }  // [AV1-2]
+    public DateTime DataDevolucao { get; private set; }  // [AV1-2]
+    public bool Ativo { get; private set; }  // [AV1-2]
 
     public Emprestimo() { }
 

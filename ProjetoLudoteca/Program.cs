@@ -18,7 +18,8 @@ class Program
             Console.WriteLine("4 - Emprestar jogo");
             Console.WriteLine("5 - Devolver jogo");
             Console.WriteLine("6 - Gerar relatório");
-            Console.WriteLine("7 - Recarregar dados");
+            Console.WriteLine("7 - Verificar multa");
+            Console.WriteLine("8 - Recarregar dados");
             Console.WriteLine("0 - Sair");
             Console.Write("Opção: ");
 
@@ -50,9 +51,13 @@ class Program
                         break;
                     case "6": // [AV1-4-Relatorio]
                         Console.Clear();
-                        //ludoteca.GerarRelatorio();
+                        ludoteca.GerarRelatorio();
                         break;
-                    case "7": // Recarregar dados
+                    case "7": // Verificar multa
+                        Console.Clear();
+                        ludoteca.VerificarMulta();
+                        break;
+                    case "8": // Recarregar dados
                         Console.Clear();
                         ludoteca.RecarregarDados();
                         break;
