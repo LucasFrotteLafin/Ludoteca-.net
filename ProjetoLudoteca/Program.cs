@@ -55,7 +55,7 @@ class Program
                         break;
                     case "7": // Verificar multa
                         Console.Clear();
-                        ludoteca.TestarMulta();
+                        ludoteca.VerificarMulta();
                         break;
                     case "8": // Recarregar dados
                         Console.Clear();

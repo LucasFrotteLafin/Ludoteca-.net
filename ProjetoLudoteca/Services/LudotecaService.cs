@@ -46,164 +46,6 @@ public class BibliotecaJogos
         }
     }
 
-    public void GerarRelatorio()
-    {
-        try
-        {
-            VerificarPasta()
-    
-        string caminhoRelatorio = Path.Combine("Data", "relatorio.txt");
-
-            string relatorio = "\n=== RELATÓRIO DA LUDOTECA ===\n";
-            relatorio += $"Data: {DateTime.Now:dd/MM/yyyy HH:mm}\n\n";
-
-            relatorio += "JOGOS CADASTRADOS:\n";
-            for (int i = 0; i < jogos.Count; i++)
-            {
-                relatorio += jogos[i].ToString() + "\n";
-            }
-
-            relatorio += "\nMEMBROS CADASTRADOS:\n";
-            for (int i = 0; i < membros.Count; i++)
-            {
-                relatorio += membros[i].ToString() + "\n";
-            }
-
-            relatorio += "\nEMPRÉSTIMOS ATIVOS:\n";
-            for (int i = 0; i < emprestimos.Count; i++)
-            {
-                if (emprestimos[i].Ativo)
-                {
-                    string nomeJogo = "Jogo não encontrado";
-                    for (int j = 0; j < jogos.Count; j++)
-                    {
-                        if (jogos[j].Id == emprestimos[i].IdJogo)
-                        {
-                            nomeJogo = jogos[j].Nome;
-                            break;
-                        }
-                    }
-
-                    relatorio += $"ID: {emprestimos[i].Id} | Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Empréstimo: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolução: {emprestimos[i].DataDevolucao:dd/MM/yyyy} | Status: Ativo\n";
-                }
-            }
-
-            relatorio += "\nHISTÓRICO DE EMPRÉSTIMOS DEVOLVIDOS:\n";
-            for (int i = 0; i < emprestimos.Count; i++)
-            {
-                if (!emprestimos[i].Ativo)
-                {
-                    string nomeJogo = "Jogo não encontrado";
-                    for (int j = 0; j < jogos.Count; j++)
-                    {
-                        if (jogos[j].Id == emprestimos[i].IdJogo)
-                        {
-                            nomeJogo = jogos[j].Nome;
-                            break;
-                        }
-                    }
-
-                    relatorio += $"ID: {emprestimos[i].Id} | Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Alugado: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolvido: {DateTime.Now:dd/MM/yyyy}\n";
-                }
-            }
-
-            relatorio += "\n" + new string('-', 50) + "\n";
-
-            File.AppendAllText(caminhoRelatorio, relatorio);
-            Console.WriteLine($"Relatório anexado em: {caminhoRelatorio}");
-        }
-        catch (Exception ex)
-        {
-            File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro ao gerar relatório: {ex.Message}\n");
-            Console.WriteLine($"Erro ao gerar relatório: {ex.Message}");
-        }
-    }
-
-    public decimal CalcularMulta(int idJogo)
-    {
-        for (int i = 0; i < emprestimos.Count; i++)
-        {
-            if (emprestimos[i].IdJogo == idJogo && emprestimos[i].Ativo)
-            {
-                DateTime hoje = DateTime.Now;
-                int diasAtraso = (hoje.Date - emprestimos[i].DataDevolucao.Date).Days;
-                if (diasAtraso > 0)
-                    return diasAtraso * 2.50m;
-            }
-        }
-        return 0;
-    }
-
-    public void PagarMulta(int idJogo, string formaPagamento)
-    {
-        decimal multa = CalcularMulta(idJogo);
-
-        if (multa == 0)
-        {
-            Console.WriteLine("Não há multa para este jogo.");
-            return;
-        }
-
-        string pagamento = formaPagamento.ToLower();
-        if (string.Equals(pagamento, "pix", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(pagamento, "dinheiro", StringComparison.OrdinalIgnoreCase))
-        {
-            Console.WriteLine($"Multa de R$ {multa:F2}  paga via {formaPagamento}.");
-        }
-        else
-        {
-            Console.WriteLine("Forma de pagamento inválida. Use 'pix' ou 'dinheiro'.");
-        }
-    }
-
-    public void ConsultarMulta()
-    {
-        Console.Write("ID do jogo: ");
-        if (!int.TryParse(Console.ReadLine(), out int idJogo))
-        {
-            throw new ArgumentException("ID do jogo deve ser um número válido");
-        }
-
-        decimal multa = CalcularMulta(idJogo);
-        if (multa > 0)
-        {
-            Console.WriteLine($"Multa: R$ {multa:F2}");
-        }
-        else
-        {
-            Console.WriteLine("Não há multa para este jogo.");
-        }
-    }
-
-    public void ProcessarPagamentoMulta()
-    {
-        Console.Write("ID do jogo: ");
-        if (!int.TryParse(Console.ReadLine(), out int idJogo))
-        {
-            throw new ArgumentException("ID do jogo deve ser um número válido");
-        }
-
-        Console.Write("Forma de pagamento (pix/dinheiro): ");
-        string formaPagamento = Console.ReadLine() ?? "";
-
-        PagarMulta(idJogo, formaPagamento);
-    }
-
-    public void TestarMulta()
-    {
-        int idJogo;
-        while (true)
-        {
-            Console.Write("ID do jogo para testar multa: ");
-            if (int.TryParse(Console.ReadLine(), out idJogo))
-                break;
-            Console.WriteLine("Por favor, digite um número válido.");
-        }
-
-        decimal multa = CalcularMulta(idJogo);
-        Console.WriteLine($"Multa calculada: R$ {multa:F2}");
-    }
-
     public void AdicionarJogo(string nome, string categoria, int idadeMinima)
     {
         // Assertiva de consistência
@@ -285,7 +127,7 @@ public class BibliotecaJogos
 
         // Buscar jogo
         Jogo? jogo = null;
-        // amazonq-ignore-next-line
+       
         for (int i = 0; i < jogos.Count; i++)
         {
             if (jogos[i].Id == idJogo)
@@ -388,7 +230,7 @@ public class BibliotecaJogos
                 if (formaPagamento.ToLower() == "pix" || formaPagamento.ToLower() == "dinheiro")
                 {
                     // Calcular dias de atraso
-            int diasAtraso = 0;
+            int diasAtr-aso = 0;
             for (int i = 0; i < emprestimos.Count; i++)
             {
                 if (emprestimos[i].IdJogo == idJogo && emprestimos[i].Ativo)
@@ -570,6 +412,165 @@ public class BibliotecaJogos
         
         RealizarDevolucao(idJogo);
         Console.WriteLine("Jogo devolvido com sucesso!");
+    }
+
+    public void GerarRelatorio()
+    {
+        try
+        {
+            VerificarPasta();
+
+
+        string caminhoRelatorio = Path.Combine("Data", "relatorio.txt");
+
+            string relatorio = "\n=== RELATÓRIO DA LUDOTECA ===\n";
+            relatorio += $"Data: {DateTime.Now:dd/MM/yyyy HH:mm}\n\n";
+
+            relatorio += "JOGOS CADASTRADOS:\n";
+            for (int i = 0; i < jogos.Count; i++)
+            {
+                relatorio += jogos[i].ToString() + "\n";
+            }
+
+            relatorio += "\nMEMBROS CADASTRADOS:\n";
+            for (int i = 0; i < membros.Count; i++)
+            {
+                relatorio += membros[i].ToString() + "\n";
+            }
+
+            relatorio += "\nEMPRÉSTIMOS ATIVOS:\n";
+            for (int i = 0; i < emprestimos.Count; i++)
+            {
+                if (emprestimos[i].Ativo)
+                {
+                    string nomeJogo = "Jogo não encontrado";
+                    for (int j = 0; j < jogos.Count; j++)
+                    {
+                        if (jogos[j].Id == emprestimos[i].IdJogo)
+                        {
+                            nomeJogo = jogos[j].Nome;
+                            break;
+                        }
+                    }
+
+                    relatorio += $"ID: {emprestimos[i].Id} | Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Empréstimo: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolução: {emprestimos[i].DataDevolucao:dd/MM/yyyy} | Status: Ativo\n";
+                }
+            }
+
+            relatorio += "\nHISTÓRICO DE EMPRÉSTIMOS DEVOLVIDOS:\n";
+            for (int i = 0; i < emprestimos.Count; i++)
+            {
+                if (!emprestimos[i].Ativo)
+                {
+                    string nomeJogo = "Jogo não encontrado";
+                    for (int j = 0; j < jogos.Count; j++)
+                    {
+                        if (jogos[j].Id == emprestimos[i].IdJogo)
+                        {
+                            nomeJogo = jogos[j].Nome;
+                            break;
+                        }
+                    }
+
+                    relatorio += $"ID: {emprestimos[i].Id} | Jogo: {nomeJogo} | Membro: {emprestimos[i].CodigoMembro} | Alugado: {emprestimos[i].DataEmprestimo:dd/MM/yyyy} | Devolvido: {DateTime.Now:dd/MM/yyyy}\n";
+                }
+            }
+
+            relatorio += "\n" + new string('-', 50) + "\n";
+
+            File.AppendAllText(caminhoRelatorio, relatorio);
+            Console.WriteLine($"Relatório anexado em: {caminhoRelatorio}");
+        }
+        catch (Exception ex)
+        {
+            File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro ao gerar relatório: {ex.Message}\n");
+            Console.WriteLine($"Erro ao gerar relatório: {ex.Message}");
+        }
+    }
+
+    public decimal CalcularMulta(int idJogo)
+    {
+        for (int i = 0; i < emprestimos.Count; i++)
+        {
+            if (emprestimos[i].IdJogo == idJogo && emprestimos[i].Ativo)
+            {
+                DateTime hoje = DateTime.Now;
+                int diasAtraso = (hoje.Date - emprestimos[i].DataDevolucao.Date).Days;
+                if (diasAtraso > 0)
+                    return diasAtraso * 2.50m;
+            }
+        }
+        return 0;
+    }
+
+    public void PagarMulta(int idJogo, string formaPagamento)
+    {
+        decimal multa = CalcularMulta(idJogo);
+
+        if (multa == 0)
+        {
+            Console.WriteLine("Não há multa para este jogo.");
+            return;
+        }
+
+        string pagamento = formaPagamento.ToLower();
+        if (string.Equals(pagamento, "pix", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(pagamento, "dinheiro", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"Multa de R$ {multa:F2}  paga via {formaPagamento}.");
+        }
+        else
+        {
+            Console.WriteLine("Forma de pagamento inválida. Use 'pix' ou 'dinheiro'.");
+        }
+    }
+
+    public void ConsultarMulta()
+    {
+        Console.Write("ID do jogo: ");
+        if (!int.TryParse(Console.ReadLine(), out int idJogo))
+        {
+            throw new ArgumentException("ID do jogo deve ser um número válido");
+        }
+
+        decimal multa = CalcularMulta(idJogo);
+        if (multa > 0)
+        {
+            Console.WriteLine($"Multa: R$ {multa:F2}");
+        }
+        else
+        {
+            Console.WriteLine("Não há multa para este jogo.");
+        }
+    }
+
+    public void ProcessarPagamentoMulta()
+    {
+        Console.Write("ID do jogo: ");
+        if (!int.TryParse(Console.ReadLine(), out int idJogo))
+        {
+            throw new ArgumentException("ID do jogo deve ser um número válido");
+        }
+
+        Console.Write("Forma de pagamento (pix/dinheiro): ");
+        string formaPagamento = Console.ReadLine() ?? "";
+
+        PagarMulta(idJogo, formaPagamento);
+    }
+
+    public void VerificarMulta()
+    {
+        int idJogo;
+        while (true)
+        {
+            Console.Write("ID do jogo para verificar multa: ");
+            if (int.TryParse(Console.ReadLine(), out idJogo))
+                break;
+            Console.WriteLine("Por favor, digite um número válido.");
+        }
+
+        decimal multa = CalcularMulta(idJogo);
+        Console.WriteLine($"Multa calculada: R$ {multa:F2}");
     }
 
     public void RecarregarDados()
