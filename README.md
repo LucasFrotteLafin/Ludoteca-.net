@@ -68,6 +68,9 @@ ProjetoLudoteca/
 ## UML
 [https://drive.google.com/file/d/12O7z3cC2zo8BqCUs5LKNd9w1FNXRLkOX/view?usp=sharing](https://drive.google.com/file/d/12O7z3cC2zo8BqCUs5LKNd9w1FNXRLkOX/view?usp=sharing)
 
+## Vídeo Explicativo
+https://drive.google.com/file/d/1t0OZelsp0HYn7SnbkQW_7PtMOGfa6FlT/view?usp=sharing
+
 ## Tecnologias
 - C# .NET 9.0
 - System.Text.Json
