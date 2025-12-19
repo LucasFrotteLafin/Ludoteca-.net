@@ -48,7 +48,6 @@ ProjetoLudoteca/
 │   └── Emprestimo.cs    # Classe de empréstimos
 ├── Services/
 │   ├── LudotecaService.cs    # Lógica principal (BibliotecaJogos)
-│   └── DateTimeConverter.cs  # Conversor de datas JSON
 ├── Data/
 │   ├── biblioteca.json  # Dados persistidos
 │   ├── debug.log       # Log de erros
