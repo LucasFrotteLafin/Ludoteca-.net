@@ -2,31 +2,41 @@
   "jogos": [
     {
       "id": 1,
-      "nome": "lego",
-      "categoria": "acao",
-      "idadeMinima": 10,
+      "nome": "mario",
+      "categoria": "aventura",
+      "idadeMinima": 12,
       "estaEmprestado": false
     }
   ],
   "membros": [
     {
-      "codigoMembro": 123,
+      "codigoMembro": 24,
       "nome": "lucas",
-      "email": "gege@gmail.com",
-      "telefone": "21983452523",
+      "email": "lucasfrotte@gmail.com",
+      "telefone": "21984567689",
       "dataNascimento": "2005-05-24T00:00:00",
-      "dataCadastro": "2025-09-26T03:24:11.0230968-03:00",
+      "dataCadastro": "2025-12-19T19:46:22.3146508-03:00",
+      "idade": 20
+    },
+    {
+      "codigoMembro": 21,
+      "nome": "1243",
+      "email": "lcuasfrotte98@gmail.com",
+      "telefone": "21345678798",
+      "dataNascimento": "2005-05-24T00:00:00",
+      "dataCadastro": "2025-12-19T19:51:05.4936462-03:00",
       "idade": 20
     }
   ],
   "emprestimos": [
     {
       "id": 0,
-      "idJogo": 1,
-      "codigoMembro": 123,
-      "dataEmprestimo": "2025-09-26T03:24:43.8516243-03:00",
-      "dataDevolucao": "2025-10-03T03:24:43.8516243-03:00",
-      "ativo": false,
+      "idJogo": 0,
+      "codigoMembro": 0,
+      "dataEmprestimo": "0001-01-01T00:00:00",
+      "dataDevolucao": "0001-01-01T00:00:00",
+      "dataDevolucaoReal": null,
+      "ativo": true,
       "multaPaga": false,
       "metodoPagamento": ""
     }
