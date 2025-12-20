@@ -24,43 +24,43 @@ class Program
 
             string opcao = Console.ReadLine() ?? "";
 
-            try // [AV1-5]
+            try
             {
                 switch (opcao)
                 {
-                    case "1": // [AV1-4-CadastrarJogo]
+                    case "1":
                         Console.Clear();
-                        ludoteca.CadastrarJogo();
+                        ludoteca.CadastrarJogo(); // Cadastrar novo jogo
                         break;
-                    case "2": // [AV1-4-CadastrarMembro]
+                    case "2":
                         Console.Clear();
-                        ludoteca.CadastrarMembro();
+                        ludoteca.CadastrarMembro(); // Cadastrar novo membro
                         break;
-                    case "3": // [AV1-4-Listar]
+                    case "3":
                         Console.Clear();
-                        ludoteca.ListarJogos();
+                        ludoteca.ListarJogos(); // Listar todos os jogos
                         break;
-                    case "4": // [AV1-4-Emprestar]
+                    case "4":
                         Console.Clear();
-                        ludoteca.EmprestarJogo();
+                        ludoteca.EmprestarJogo(); // Realizar empréstimo
                         break;
-                    case "5": // [AV1-4-Devolver]
+                    case "5":
                         Console.Clear();
-                        ludoteca.DevolverJogo();
+                        ludoteca.DevolverJogo(); // Devolver jogo emprestado
                         break;
-                    case "6": // [AV1-4-Relatorio]
+                    case "6":
                         Console.Clear();
-                        ludoteca.GerarRelatorio();
+                        ludoteca.GerarRelatorio(); // Gerar relatório completo
                         break;
-                    case "7": // Verificar multa
+                    case "7": 
                         Console.Clear();
-                        ludoteca.VerificarMulta();
+                        ludoteca.VerificarMulta(); // Verificar multa por atraso
                         break;
-                    case "8": // Recarregar dados
+                    case "8": 
                         Console.Clear();
-                        ludoteca.RecarregarDados();
+                        ludoteca.RecarregarDados(); // Recarregar dados do arquivo
                         break;
-                    case "0":
+                    case "0": 
                         Console.WriteLine("Saindo...");
                         return;
                     default:
@@ -70,6 +70,7 @@ class Program
             }
             catch (Exception ex)
             {
+                // Log de erro para debug
                 File.AppendAllText("Data/debug.log", $"[{DateTime.Now}] Erro: {ex.Message}\n");
                 Console.WriteLine("Erro ao executar a operação.");
             }

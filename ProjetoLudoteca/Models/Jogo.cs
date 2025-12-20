@@ -7,11 +7,11 @@ public class Jogo
 {
     private const int RESTRICAO_DE_IDADE = 18;
     
-    public int Id { get; private set; }  // [AV1-2]
-    public string Nome { get; private set; }  // [AV1-2]
-    public string Categoria { get; private set; }  // [AV1-2]
-    public int IdadeMinima { get; private set; }  // [AV1-2]
-    public bool EstaEmprestado { get; private set; }  // [AV1-2]
+    public int Id { get; private set; }
+    public string Nome { get; private set; }
+    public string Categoria { get; private set; }
+    public int IdadeMinima { get; private set; }
+    public bool EstaEmprestado { get; private set; }
 
     public Jogo()
     {
@@ -26,6 +26,7 @@ public class Jogo
         ValidarCategoria(categoria);
         ValidarIdadeMinima(idadeMinima);
 
+        
         Id = id;
         Nome = nome;
         Categoria = categoria;
@@ -61,11 +62,13 @@ public class Jogo
     {
         if (EstaEmprestado)
             throw new InvalidOperationException($"Jogo '{Nome}' já está emprestado");
+        // Marcar como emprestado
         EstaEmprestado = true;
     }
 
     public void MarcarComoDevolvido()
     {
+        // Marcar como disponível
         EstaEmprestado = false;
     }
 

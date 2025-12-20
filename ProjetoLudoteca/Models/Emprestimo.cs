@@ -7,17 +7,18 @@ public class Emprestimo
 {
     private const int DIAS_MAXIMO_EMPRESTIMO = 7;
 
-    public int Id { get; private set; }  // [AV1-2]
-    public int IdJogo { get; private set; }  // [AV1-2]
-    public int CodigoMembro { get; private set; }  // [AV1-2]
-    public DateTime DataEmprestimo { get; private set; }  // [AV1-2]
-    public DateTime DataDevolucao { get; private set; }  // [AV1-2]
-    public bool Ativo { get; private set; }  // [AV1-2]
+    public int Id { get; set; }
+    public int IdJogo { get; private set; }
+    public int CodigoMembro { get; private set; }
+    public DateTime DataEmprestimo { get; private set; }
+    public DateTime DataDevolucao { get; private set; }
+    public DateTime? DataDevolucaoReal { get; private set; }
+    public bool Ativo { get; private set; } = true;
     public bool MultaPaga { get; private set; } = false;
     [JsonIgnore]
-    public decimal ValorMulta => DiasAtraso * 2.50m;
+    public decimal ValorMulta => Ativo ? DiasAtraso * 2.50m : 0;
     [JsonIgnore]
-    public int DiasAtraso => DateTime.Now > DataDevolucao ? (DateTime.Now.Date - DataDevolucao.Date).Days : 0;
+    public int DiasAtraso => Ativo && DateTime.Now > DataDevolucao ? (DateTime.Now.Date - DataDevolucao.Date).Days : 0;
     public string MetodoPagamento { get; private set; } = "";
 
     public Emprestimo() { }
@@ -29,10 +30,12 @@ public class Emprestimo
 
         DateTime agora = DateTime.Now;
         
+        // Definir dados do empréstimo
         IdJogo = idJogo;
         CodigoMembro = codigoMembro;
         DataEmprestimo = agora;
         DataDevolucao = agora.AddDays(diasEmprestimo);
+        Ativo = true;
     }
 
     private static void ValidarIdPositivo(int valor, string nomeParametro, string tipoEntidade)
@@ -42,10 +45,18 @@ public class Emprestimo
     }
 
     public bool EstaAtrasado() =>
-        DateTime.Now > DataDevolucao;
+        Ativo && DateTime.Now > DataDevolucao;
+
+    public void RegistrarDevolucao()
+    {
+        // Registrar data real de devolução
+        DataDevolucaoReal = DateTime.Now;
+        Ativo = false;
+    }
 
     public void RegistrarPagamentoMulta(string metodo)
     {
+        // Marcar multa como paga
         MultaPaga = true;
         MetodoPagamento = metodo;
     }

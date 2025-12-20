@@ -9,7 +9,7 @@ public class Membro
     // Constantes para validação
     private const int CODIGO_MAXIMO = 999999;
     private const string PADRAO_EMAIL = @"^[a-zA-Z0-9._]+@[a-zA-Z0-9._]+\.[a-zA-Z]{2,}$";
-    private const string PADRAO_TELEFONE = @"^[1-9]{2}[9]?[0-9]{8}$";
+    private const string PADRAO_TELEFONE = @"^[1-9]{2}[0-9]{8,9}$";
     private const int IDADE_MAXIMA = 120;
 
     // Propriedades públicas
@@ -30,6 +30,7 @@ public class Membro
             
         ValidarDados(codigoMembro, nome, email, telefone, dataNascimento, dataCadastro);
         
+        // Definir propriedades do membro
         CodigoMembro = codigoMembro;
         Nome = nome ?? string.Empty;
         Email = email ?? string.Empty;
@@ -59,6 +60,10 @@ public class Membro
     {
         if (string.IsNullOrWhiteSpace(nome))
             throw new ArgumentException("Nome é obrigatório", nameof(nome));
+        
+        // Verificar se contém apenas letras e espaços
+        if (!Regex.IsMatch(nome, @"^[a-zA-ZÀ-ÿ\s]+$"))
+            throw new ArgumentException("Nome deve conter apenas letras e espaços", nameof(nome));
     }
 
     private static void ValidarEmail(string email)
@@ -69,8 +74,16 @@ public class Membro
 
     private static void ValidarTelefone(string telefone)
     {
-        if (string.IsNullOrWhiteSpace(telefone) || !Regex.IsMatch(telefone, PADRAO_TELEFONE))
-            throw new ArgumentException("Telefone deve ter formato: DDNNNNNNNNN (ex: 11987654321)", nameof(telefone));
+        if (string.IsNullOrWhiteSpace(telefone))
+            throw new ArgumentException("Telefone é obrigatório", nameof(telefone));
+        
+        // Verificar se contém apenas números
+        if (!Regex.IsMatch(telefone, @"^[0-9]+$"))
+            throw new ArgumentException("Telefone deve conter apenas números", nameof(telefone));
+        
+        // Verificar formato brasileiro
+        if (!Regex.IsMatch(telefone, @"^[1-9]{2}[0-9]{8,9}$"))
+            throw new ArgumentException("Telefone deve ter formato: DDNNNNNNNN ou DDNNNNNNNNN (ex: 1187654321 ou 11987654321)", nameof(telefone));
     }
 
     private static void ValidarDataNascimento(DateTime data)
